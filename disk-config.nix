@@ -26,8 +26,8 @@
                 # if you want to use the key for interactive login be sure there is no trailing newline
                 # for example use `echo -n "password" > /tmp/secret.key`
                 passwordFile = "/tmp/password.key"; # Interactive
-                settings.keyFile = "/tmp/secret.key";
-                #additionalKeyFiles = [ "/tmp/additionalSecret.key" ];
+                # settings.keyFile = "/tmp/secret.key";
+                additionalKeyFiles = [ "/mnt/etc/luks/luks.key" ];
                 content = {
                   type = "btrfs";
                   extraArgs = [ "-f" ];
