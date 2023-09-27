@@ -12,6 +12,13 @@
           ./configuration.nix
         ];
       };
+      nixosConfigurations.ovhcloud = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          disko.nixosModules.disko
+          ./configuration.nix
+        ];
+      };
       # tested with 2GB/2CPU droplet, 1GB droplets do not have enough RAM for kexec
       nixosConfigurations.digitalocean = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";

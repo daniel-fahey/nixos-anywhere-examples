@@ -1,15 +1,15 @@
 { modulesPath, config, lib, pkgs, ... }: {
   imports = [
-    (modulesPath + "/installer/scan/not-detected.nix")
-    (modulesPath + "/profiles/qemu-guest.nix")
+    #(modulesPath + "/installer/scan/not-detected.nix")
+    #(modulesPath + "/profiles/qemu-guest.nix")
+    ./hardware-configuration.nix
     ./disk-config.nix
   ];
-  boot.loader.grub = {
-    # no need to set devices, disko will add all devices that have a EF02 partition to the list already
-    # devices = [ ];
-    efiSupport = true;
-    efiInstallAsRemovable = true;
-  };
+
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
+  boot.loader.efi.efiSysMountPoint = "/efi";
+
   services.openssh.enable = true;
 
   environment.systemPackages = map lib.lowPrio [
@@ -18,8 +18,7 @@
   ];
 
   users.users.root.openssh.authorizedKeys.keys = [
-    # change this to your ssh key
-    "CHANGE"
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIx7HUtW51MWtbPo/9Sq3yUVfNjPAZgRCDBkv4ZKVE55 dpfahey@gmail.com"
   ];
 
   system.stateVersion = "23.11";
