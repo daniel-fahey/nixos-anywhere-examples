@@ -42,5 +42,12 @@
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIx7HUtW51MWtbPo/9Sq3yUVfNjPAZgRCDBkv4ZKVE55 dpfahey@gmail.com"
   ];
 
+  boot.initrd.network.enable = true;
+  boot.initrd.ssh = {
+    enable = true;
+    authorizedKeys = config.users.users.root.openssh.authorizedKeys.keys;
+  };
+
+
   system.stateVersion = "23.11";
 }
