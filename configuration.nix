@@ -1,7 +1,5 @@
 { modulesPath, config, lib, pkgs, ... }: {
   imports = [
-    #(modulesPath + "/installer/scan/not-detected.nix")
-    #(modulesPath + "/profiles/qemu-guest.nix")
     ./hardware-configuration.nix
     ./disk-config.nix
   ];
@@ -15,10 +13,30 @@
   time.timeZone = "Europe/London";
   i18n.defaultLocale = "en_GB.UTF-8";
 
-  environment.systemPackages = map lib.lowPrio [
-    pkgs.curl
-    pkgs.gitMinimal
+  # Ensure the rsync package is available on the system
+  environment.systemPackages = with pkgs; [
+    rsync
+    curl
+    git
   ];
+
+  # Define the activation script
+  system.activationScripts.copyESP = {
+    text = ''
+      # Ensure the mount point for the secondary ESP exists
+      mkdir -p /efi2
+      
+      # Mount the backup ESP
+      mount /dev/disk/by-partlabel/disk-backup-ESP /efi2
+      
+      # Use rsync to copy the ESP contents. This will only copy changes.
+      ${pkgs.rsync}/bin/rsync --archive --delete /efi/ /efi2/
+      
+      # Unmount the secondary ESP
+      umount /efi2
+    '';
+    deps = [];
+  };
 
   users.users.root.openssh.authorizedKeys.keys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIx7HUtW51MWtbPo/9Sq3yUVfNjPAZgRCDBkv4ZKVE55 dpfahey@gmail.com"
