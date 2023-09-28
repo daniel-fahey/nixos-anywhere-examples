@@ -42,6 +42,8 @@
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIx7HUtW51MWtbPo/9Sq3yUVfNjPAZgRCDBkv4ZKVE55 dpfahey@gmail.com"
   ];
 
+  boot.initrd.debugInteractiveShell = true;
+
   boot.initrd.network.enable = true;
   boot.initrd.ssh = {
     enable = true;
