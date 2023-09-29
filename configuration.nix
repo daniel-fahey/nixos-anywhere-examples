@@ -54,7 +54,7 @@
 
   boot.initrd.availableKernelModules = [ "ixgbe" ];
 
-  boot.kernelParams = [ "ip=dhcp" ];
+  boot.kernelParams = [ "ip=eno3:dhcp" ];
 
   system.stateVersion = "23.11";
 }
