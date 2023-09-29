@@ -42,20 +42,7 @@
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIx7HUtW51MWtbPo/9Sq3yUVfNjPAZgRCDBkv4ZKVE55 dpfahey@gmail.com"
   ];
 
-  systemd.services."serial-getty@ttyS0" = {
-    enable = true;
-    after = [ "multi-user.target" ];
-    wantedBy = [ "multi-user.target" ];
-    serviceConfig.ExecStart = [
-      ""
-      "${pkgs.agetty}/sbin/agetty -L 115200 ttyS0 xterm"
-    ];
-  };
-
-  boot.initrd.debugInteractiveShell = true;
-
   boot.kernelParams = [
-    "rd.break=pre-mount"
     "systemd.log_level=debug"
     "console=tty0"
     "console=ttyS0,115200"
