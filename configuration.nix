@@ -42,19 +42,18 @@
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIx7HUtW51MWtbPo/9Sq3yUVfNjPAZgRCDBkv4ZKVE55 dpfahey@gmail.com"
   ];
 
+  #https://github.com/NixOS/nixpkgs/issues/84105
   boot.kernelParams = [
-    "systemd.log_level=debug"
-    "console=tty0"
     "console=ttyS0,115200"
-    "ip=dhcp"
+    "console=tty1"
     "loglevel=7"
-    "printk.devkmsg=on"
-    "earlyprintk=ttyS0,115200"
-    "ignore_loglevel"
-    "rd.shell"
-    "debug"
-    "initcall_debug"
   ];
+
+  systemd.services."serial-getty@ttyS0" = {
+    enable = true;
+    wantedBy = [ "getty.target" ]; # to start at boot
+    serviceConfig.Restart = "always"; # restart when session is closed
+  };
 
   boot.initrd = {
     availableKernelModules = [ "ixgbe" ];
