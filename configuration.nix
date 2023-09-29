@@ -40,6 +40,7 @@
     speedtest-go
     unibilium
     kitty
+    radianWrapper
   ];
 
   services.btrfs.autoScrub = {
