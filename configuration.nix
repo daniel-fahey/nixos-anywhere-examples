@@ -18,7 +18,31 @@
     rsync
     curl
     git
+    htop
+    vim
+    tmux
+    lsof
+    net-tools
+    nmap
+    strace
+    tcpdump
+    iotop
+    ncdu
+    btdu
+    iftop
+    bash-completion
+    pciutils
+    ethtool
+    go
+    python311Full
+    R
+    yggdrasil
   ];
+
+  services.btrfs.autoScrub = {
+    enable = true;
+    period = "daily";
+  };
 
   # Define the activation script
   system.activationScripts.copyESP = {
@@ -53,8 +77,6 @@
   };
 
   boot.initrd.availableKernelModules = [ "ixgbe" ];
-
-  boot.kernelParams = [ "ip=eno3:dhcp" ];
 
   system.stateVersion = "23.11";
 }
