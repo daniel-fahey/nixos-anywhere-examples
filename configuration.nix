@@ -48,12 +48,17 @@
     "console=ttyS0,115200"
   ];
 
-  boot.initrd.network.enable = true;
-  boot.initrd.ssh = {
-    enable = true;
-    authorizedKeys = config.users.users.root.openssh.authorizedKeys.keys;
+  boot.initrd = {
+    network = {
+      enable = true;
+      port = 2222;
+      ssh = {
+        enable = true;
+        authorizedKeys = config.users.users.root.openssh.authorizedKeys.keys;
+      };
+    };
+    luks.forceLuksSupportInInitrd = true;
   };
-
 
   system.stateVersion = "23.11";
 }
