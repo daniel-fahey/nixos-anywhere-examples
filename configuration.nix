@@ -40,7 +40,7 @@
     speedtest-go
     unibilium
     kitty
-    radianWrapper
+    python311Packages.radian
   ];
 
   services.btrfs.autoScrub = {
