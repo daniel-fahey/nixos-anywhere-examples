@@ -44,6 +44,8 @@
 
   boot.initrd.debugInteractiveShell = true;
 
+  boot.kernelParams = [ "rd.break=pre-mount" "rd.break=pre-mount" ];
+
   boot.initrd.network.enable = true;
   boot.initrd.ssh = {
     enable = true;
