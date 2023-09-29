@@ -37,6 +37,7 @@
     python311Full
     R
     yggdrasil
+    speedtest-go
   ];
 
   services.btrfs.autoScrub = {
