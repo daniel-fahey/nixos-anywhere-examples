@@ -38,6 +38,7 @@
     R
     yggdrasil
     speedtest-go
+    unibilium
   ];
 
   services.btrfs.autoScrub = {
