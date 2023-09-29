@@ -51,9 +51,9 @@
   boot.initrd = {
     network = {
       enable = true;
-      port = 2222;
       ssh = {
         enable = true;
+        port = 2222;
         authorizedKeys = config.users.users.root.openssh.authorizedKeys.keys;
       };
     };
