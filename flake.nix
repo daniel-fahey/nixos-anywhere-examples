@@ -1,5 +1,5 @@
 {
-  description = "OVHcloud dedicated server"
+  description = "OVHcloud dedicated server";
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     disko.url = "github:nix-community/disko";
