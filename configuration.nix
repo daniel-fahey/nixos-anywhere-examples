@@ -39,6 +39,7 @@
     yggdrasil
     speedtest-go
     unibilium
+    kitty
   ];
 
   services.btrfs.autoScrub = {
