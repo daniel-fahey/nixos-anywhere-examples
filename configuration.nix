@@ -47,6 +47,13 @@
     "console=tty0"
     "console=ttyS0,115200"
     "ip=dhcp"
+    "loglevel=7"
+    "printk.devkmsg=on"
+    "earlyprintk=ttyS0,115200"
+    "ignore_loglevel"
+    "rd.shell"
+    "debug"
+    "initcall_debug"
   ];
 
   boot.initrd = {
