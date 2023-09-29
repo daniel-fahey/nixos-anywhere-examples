@@ -22,7 +22,7 @@
     vim
     tmux
     lsof
-    net-tools
+    nettools
     nmap
     strace
     tcpdump
