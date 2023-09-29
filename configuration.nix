@@ -42,33 +42,19 @@
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIx7HUtW51MWtbPo/9Sq3yUVfNjPAZgRCDBkv4ZKVE55 dpfahey@gmail.com"
   ];
 
-  #https://github.com/NixOS/nixpkgs/issues/84105
-  boot.kernelParams = [
-    "console=ttyS0,115200"
-    "console=tty1"
-    "loglevel=7"
-  ];
-
-  systemd.services."serial-getty@ttyS0" = {
+  # ssh setup
+  boot.initrd.network.enable = true;
+  boot.initrd.network.ssh = {
     enable = true;
-    wantedBy = [ "getty.target" ]; # to start at boot
-    serviceConfig.Restart = "always"; # restart when session is closed
+    port = 2222;
+    shell = "/bin/cryptsetup-askpass";
+    authorizedKeys = config.users.users.root.openssh.authorizedKeys.keys;
+    hostKeys = [ "/etc/secrets/initrd/ssh_host_ed25519_key" ];
   };
 
-  boot.initrd = {
-    availableKernelModules = [ "ixgbe" ];
-    network = {
-      enable = true;
-      ssh = {
-        enable = true;
-        port = 2222;
-        shell = "/bin/cryptsetup-askpass";
-        # ssh-keygen -t ed25519 -N "" -f /etc/secrets/initrd/ssh_host_ed25519_key
-        hostKeys = [ "/etc/secrets/initrd/ssh_host_ed25519_key" ];
-        authorizedKeys = config.users.users.root.openssh.authorizedKeys.keys;
-      };
-    };
-  };
+  boot.initrd.availableKernelModules = [ "ixgbe" ];
+
+  boot.kernelParams = [ "ip=dhcp" ];
 
   system.stateVersion = "23.11";
 }
