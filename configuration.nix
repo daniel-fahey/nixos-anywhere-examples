@@ -41,7 +41,7 @@
 
   services.btrfs.autoScrub = {
     enable = true;
-    period = "daily";
+    interval = "daily";
   };
 
   # Define the activation script
