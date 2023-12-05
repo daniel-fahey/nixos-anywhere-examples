@@ -5,7 +5,9 @@
   ];
 
   # This line will populate NIX_PATH
-  nix.nixPath = [ "nixpkgs=${pkgs.path}" ];
+  nix.nixPath = [ "nixpkgs=${pkgs.path}" ]; # for `nix-shell -p ...`
+
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
