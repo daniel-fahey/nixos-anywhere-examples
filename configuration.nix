@@ -12,6 +12,7 @@
   boot.loader.efi.efiSysMountPoint = "/efi";
 
   services.openssh.enable = true;
+  services.openssh.settings.X11Forwarding = true;
 
   time.timeZone = "Europe/London";
   i18n.defaultLocale = "en_GB.UTF-8";
