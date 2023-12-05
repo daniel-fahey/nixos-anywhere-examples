@@ -4,6 +4,9 @@
     ./disk-config.nix
   ];
 
+  # This line will populate NIX_PATH
+  nix.nixPath = [ "nixpkgs=${pkgs.path}" ];
+
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.efi.efiSysMountPoint = "/efi";
