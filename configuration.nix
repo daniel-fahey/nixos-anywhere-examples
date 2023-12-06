@@ -4,6 +4,8 @@
     ./disk-config.nix
   ];
 
+  swapDevices = [ { device = "/.swapvol/swapfile"; } ];
+
   # This line will populate NIX_PATH
   nix.nixPath = [ "nixpkgs=${pkgs.path}" ]; # for `nix-shell -p ...`
 
