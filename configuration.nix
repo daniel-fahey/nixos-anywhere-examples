@@ -4,8 +4,6 @@
     ./disk-config.nix
   ];
 
-  swapDevices = [ { device = "/.swapvol/swapfile"; } ];
-
   # This line will populate NIX_PATH
   nix.nixPath = [ "nixpkgs=${pkgs.path}" ]; # for `nix-shell -p ...`
 
@@ -91,6 +89,15 @@
   boot.initrd.availableKernelModules = [ "ixgbe" ];
 
   boot.kernelParams = [ "ip=dhcp" ];
+
+  zramSwap = {
+    enable = true;
+    swapDevices = 1;  # One zram device
+    memoryPercent = 50;  # Use up to 50% of total RAM
+    algorithm = "zstd";  # Use Zstandard compression
+    priority = 10;  # Higher priority than disk-based swap
+    # Optional: memoryMax, writebackDevice
+  };
 
   system.stateVersion = "23.11";
 }

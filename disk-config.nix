@@ -79,10 +79,6 @@
                     mountpoint = "/var/log";
                     mountOptions = [ "compress=zstd:3" "noatime" "discard=async" ];
                   };
-                "@swap" = {
-                    mountpoint = "/.swapvol";
-                    swap.swapfile.size = "32G";
-                  };
               };
             };
           };
