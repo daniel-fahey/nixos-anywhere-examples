@@ -15,6 +15,7 @@
             type = "filesystem";
             format = "vfat";
             mountpoint = null; # Not mounting this one since we already have the other drive's ESP mounted
+            mountOptions = [ "defaults "];
           };
         };
         LUKS = {
@@ -44,6 +45,7 @@
             type = "filesystem";
             format = "vfat";
             mountpoint = "/efi";
+            mountOptions = [ "defaults "];
           };
         };
         LUKS = {
@@ -51,23 +53,35 @@
           content = {
             type = "luks";
             name = "primary-crypt";
-            extraOpenArgs = [ "--allow-discards" ];
-            passwordFile = "/tmp/password.key";
+            passwordFile = "/tmp/password.key"; # Interactive
+            settings.allowDiscards = true;
             content = {
               type = "btrfs";
               extraArgs = [ "--force" "--metadata raid1" "--data raid1" "/dev/mapper/backup-crypt" ];
               subvolumes = {
-                "@root" = {
+                "@" = {
                     mountpoint = "/";
-                    mountOptions = [ "compress=zstd:1" "noatime" ];
+                    mountOptions = [ "compress=zstd:3" "noatime" "discard=async" ];
                   };
                 "@home" = {
                     mountpoint = "/home";
-                    mountOptions = [ "compress=zstd:1" "noatime" ];
+                    mountOptions = [ "compress=zstd:3" "noatime" "discard=async" ];
                   };
                 "@nix" = {
                     mountpoint = "/nix";
-                    mountOptions = [ "compress=zstd:1" "noatime" ];
+                    mountOptions = [ "compress=zstd:3" "noatime" "discard=async" ];
+                  };
+                "@persist" = {
+                    mountpoint = "/persist";
+                    mountOptions = [ "compress=zstd:3" "noatime" "discard=async" ];
+                  };
+                "@log" = {
+                    mountpoint = "/var/log";
+                    mountOptions = [ "compress=zstd:3" "noatime" "discard=async" ];
+                  };
+                "@swap" = {
+                    mountpoint = "/.swapvol";
+                    swap.swapfile.size = "32G";
                   };
               };
             };
