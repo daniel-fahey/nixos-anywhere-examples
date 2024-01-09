@@ -4,6 +4,10 @@ temp=$(mktemp -d)
 install -d -m755 "$temp/etc/secrets/initrd"
 ssh-keygen -t ed25519 -N "" -f $temp/etc/secrets/initrd/ssh_host_ed25519_key
 
+# host key
+install -d -m755 "$temp/etc/ssh"
+ssh-keygen -t ed25519 -N "" -f $temp/etc/ssh/ssh_host_ed25519_key
+
 # disk password
 echo "password" > /tmp/password.key
 
