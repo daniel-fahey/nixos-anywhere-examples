@@ -40,13 +40,10 @@
     pciutils
     ethtool
     go
-    python311Full
-    R
     yggdrasil
     speedtest-go
     unibilium
     kitty
-    python311Packages.radian
   ];
 
   services.btrfs.autoScrub = {
