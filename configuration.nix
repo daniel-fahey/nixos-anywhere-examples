@@ -1,4 +1,4 @@
-{ modulesPath, config, lib, pkgs, ... }: {
+{ modulesPath, config, lib, pkgs, secrets, ... }: {
   imports = [
     ./hardware-configuration.nix
     ./disk-config.nix
@@ -9,12 +9,52 @@
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
+  boot.kernelPackages = pkgs.linuxPackages_latest;
+
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.efi.efiSysMountPoint = "/efi";
 
   services.openssh.enable = true;
   services.openssh.settings.X11Forwarding = true;
+
+  environment.variables.EDITOR = "vim";
+
+  networking = {
+    interfaces = {
+      eno3.ipv6.addresses = [{
+        address = secrets.networking.ipv6_address;
+        prefixLength = 64;
+      }];
+    };
+    defaultGateway6 = {
+      address = secrets.networking.ipv6_gateway;
+      interface = "eno3";
+    };
+  };
+
+  # https://nixos.org/manual/nixos/unstable/#module-security-acme-nginx
+  security.acme = {
+    acceptTerms = true;
+    defaults.email = secrets.acme.email;
+  };
+  services.nginx = {
+    enable = true;
+    virtualHosts = let
+      domain = secrets.nginx.domain;
+    in {
+      "${domain}" = {
+        forceSSL = true;
+        enableACME = true;
+        serverAliases = [ domain ];
+        locations."/" = {
+          root = "/var/www";
+        };
+      };
+    };
+  };
+
+
 
   time.timeZone = "Europe/London";
   i18n.defaultLocale = "en_GB.UTF-8";
@@ -44,6 +84,7 @@
     speedtest-go
     unibilium
     kitty
+    git-crypt
   ];
 
   services.btrfs.autoScrub = {
