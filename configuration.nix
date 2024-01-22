@@ -56,10 +56,30 @@
           root = "/var/www";
         };
       };
+      ${config.services.nextcloud.hostName} = {
+        forceSSL = true;
+        enableACME = true;
+      };
     };
   };
 
+  age.secrets.nextcloud-admin-pass = {
+    file = ./secrets/nextcloud-admin-pass.age;
+    mode = "600";
+    owner = "nextcloud";
+    group = "nextcloud";
+  };
 
+  services.nextcloud = {                
+    enable = true;
+    package = pkgs.nextcloud28;
+    hostName = "cloud.${secrets.nginx.domain}";
+    config.adminpassFile = config.age.secrets.nextcloud-admin-pass.path;
+    extraApps = {
+      inherit (config.services.nextcloud.package.packages.apps) contacts calendar tasks;
+    };
+    extraAppsEnable = true;
+  };
 
   time.timeZone = "Europe/London";
   i18n.defaultLocale = "en_GB.UTF-8";
