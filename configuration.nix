@@ -33,6 +33,11 @@
     };
   };
 
+  networking.firewall = {
+    enable = true;
+    allowedTCPPorts = [ 80 443 ];
+  };
+
   # https://nixos.org/manual/nixos/unstable/#module-security-acme-nginx
   security.acme = {
     acceptTerms = true;
