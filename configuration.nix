@@ -43,6 +43,16 @@
     acceptTerms = true;
     defaults.email = secrets.acme.email;
   };
+
+  mailserver = {
+    enable = true;
+    fqdn = "mail.${secrets.nginx.domain}";
+    domains = [ secrets.nginx.domain ];
+
+    certificateScheme = "acme";
+
+  };
+
   services.nginx = {
     enable = true;
     virtualHosts = let
@@ -55,6 +65,10 @@
         locations."/" = {
           root = "/var/www";
         };
+      };
+      "mail.${domain}" = {
+        forceSSL = true;
+        enableACME = true;
       };
       ${config.services.nextcloud.hostName} = {
         forceSSL = true;

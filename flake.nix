@@ -11,9 +11,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.darwin.follows = "";
     };
+    simple-nixos-mailserver.url = "gitlab:simple-nixos-mailserver/nixos-mailserver/master";
   };
 
-  outputs = { self, nixpkgs, disko, agenix, ... }: let
+  outputs = { self, nixpkgs, disko, agenix, simple-nixos-mailserver, ... }: let
     secrets = builtins.fromJSON (builtins.readFile "${self}/secrets/secrets.json");
   in
   {
@@ -27,6 +28,7 @@
         {
           environment.systemPackages = [ agenix.packages.x86_64-linux.default ];
         }
+        simple-nixos-mailserver.nixosModules.mailserver
       ];
     };
   };
