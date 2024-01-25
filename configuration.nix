@@ -88,11 +88,32 @@
     enable = true;
     package = pkgs.nextcloud28;
     hostName = "cloud.${secrets.nginx.domain}";
-    config.adminpassFile = config.age.secrets.nextcloud-admin-pass.path;
+    database.createLocally = true;
+    config = {
+      adminpassFile = config.age.secrets.nextcloud-admin-pass.path;
+      dbtype = "pgsql";
+    };
+    autoUpdateApps.enable = true;
     extraApps = {
       inherit (config.services.nextcloud.package.packages.apps) contacts calendar tasks;
     };
     extraAppsEnable = true;
+    configureRedis = true;
+    extraOptions = {
+      mail_smtpmode = "sendmail";
+      mail_sendmailmode = "pipe";
+      overwriteprotocol = "https";
+      default_phone_region = "GB";
+    };
+    maxUploadSize = "16G";
+    https = true;
+    phpOptions = {
+      "opcache.jit" = "tracing";
+      "opcache.jit_buffer_size" = "100M";
+      # recommended by nextcloud admin overview
+      "opcache.interned_strings_buffer" = "16";
+    };
+
   };
 
   time.timeZone = "Europe/London";
