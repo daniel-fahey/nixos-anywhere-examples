@@ -1,4 +1,30 @@
-{ modulesPath, config, lib, pkgs, secrets, ... }: {
+{ modulesPath, config, lib, pkgs, secrets, ... }:
+
+let
+  # Custom derivation to substitute placeholders in coolwsd.xml
+  coolwsdXml = pkgs.stdenv.mkDerivation {
+    name = "coolwsd-xml";
+    src = ./coolwsd.xml; # Adjust if coolwsd.xml is in a different directory
+    buildInputs = [ pkgs.gnused ];
+
+    unpackPhase = ":"; # Override default unpack phase
+    patchPhase = ":"; # Override default patch phase
+
+    buildPhase = ''
+      cp $src coolwsd.xml
+      sed -i \
+        -e "s|__NEXTCLOUD_DOMAIN__|cloud.${secrets.nginx.domain}|g" \
+        -e "s|__PASSWORD__|${secrets.collabora.admin-password}|g" \
+        coolwsd.xml
+    '';
+
+    installPhase = ''
+      mkdir -p $out
+      cp coolwsd.xml $out
+    '';
+  };
+in
+{
   imports = [
     ./hardware-configuration.nix
     ./disk-config.nix
@@ -53,25 +79,31 @@
 
   };
 
+  environment.etc."coolwsd/coolwsd.xml".source = coolwsdXml;
+
   virtualisation.oci-containers = {
     backend = "docker";
     containers.collabora = {
       image = "collabora/code:latest";
+      volumes = [
+        # Mount the coolwsd.xml file in the container
+        "${coolwsdXml}/coolwsd.xml:/etc/coolwsd/coolwsd.xml"
+      ];
       # imageFile = pkgs.dockerTools.pullImage {
       #   imageName = "collabora/code";
       #   imageDigest = "sha256:d9b7ca592d2fb6956b7bf399b7080c338a73ea336718570051749ebcb9546ef2";
       #   sha256 = "05zk1p9mby59id7ny78d971nsz9dyrrf1ng6dsd2y7nkwa1679m4";
       # };
       ports = ["9980:9980"];
-      environment = {
-        # username = "admin";
-        # password = secrets.collabora.admin-password;
-        # server_name = builtins.replaceStrings ["."] ["\\."] "code.${secrets.nginx.domain}"; # corrupts URL in /hosting/discovery
-        aliasgroup1 = builtins.replaceStrings ["."] ["\\."] "https://cloud.${secrets.nginx.domain}";
-        server_name = "code.${secrets.nginx.domain}";
-        # aliasgroup1 = "https://cloud.${secrets.nginx.domain}:443";
-        extra_params = "--o:ssl.enable=false --o:ssl.termination=true";
-      };
+      # environment = {
+      #   # username = "admin";
+      #   # password = secrets.collabora.admin-password;
+      #   # server_name = builtins.replaceStrings ["."] ["\\."] "code.${secrets.nginx.domain}"; # corrupts URL in /hosting/discovery
+      #   aliasgroup1 = builtins.replaceStrings ["."] ["\\."] "https://cloud.${secrets.nginx.domain}";
+      #   server_name = "code.${secrets.nginx.domain}";
+      #   # aliasgroup1 = "https://cloud.${secrets.nginx.domain}:443";
+      #   extra_params = "--o:ssl.enable=false --o:ssl.termination=true";
+      # };
       extraOptions = [ "--cap-add=MKNOD" ];
     };
   };
@@ -121,10 +153,6 @@
               proxy_set_header Upgrade $http_upgrade;
               proxy_set_header Connection "Upgrade";
               proxy_set_header Host $host;
-              proxy_set_header X-Real-IP $remote_addr;
-              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-              proxy_set_header X-Forwarded-Proto $scheme;
-              proxy_http_version 1.1;
               proxy_read_timeout 36000s;
               more_set_headers "X-Frame-Options: ALLOWALL"; # Note: The Admin Console websocket does not use X-Frame-Options
             '';
@@ -183,6 +211,7 @@
       default_phone_region = "GB";
       # allow_local_remote_servers = true;
       # trusted_domains = [ config.virtualisation.oci-containers.containers.collabora.environment.server_name ];
+      overwrite.cli.url = "https://cloud.${secrets.nginx.domain}";
     };
     maxUploadSize = "16G";
     https = true;
