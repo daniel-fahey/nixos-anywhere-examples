@@ -53,19 +53,45 @@
 
   };
 
+  virtualisation.oci-containers = {
+    backend = "docker";
+    containers.collabora = {
+      image = "collabora/code:latest";
+      # imageFile = pkgs.dockerTools.pullImage {
+      #   imageName = "collabora/code";
+      #   imageDigest = "sha256:d9b7ca592d2fb6956b7bf399b7080c338a73ea336718570051749ebcb9546ef2";
+      #   sha256 = "05zk1p9mby59id7ny78d971nsz9dyrrf1ng6dsd2y7nkwa1679m4";
+      # };
+      ports = ["9980:9980"];
+      environment = {
+        # username = "admin";
+        # password = secrets.collabora.admin-password;
+        # server_name = builtins.replaceStrings ["."] ["\\."] "code.${secrets.nginx.domain}"; # corrupts URL in /hosting/discovery
+        aliasgroup1 = builtins.replaceStrings ["."] ["\\."] "https://cloud.${secrets.nginx.domain}";
+        server_name = "code.${secrets.nginx.domain}";
+        # aliasgroup1 = "https://cloud.${secrets.nginx.domain}:443";
+        extra_params = "--o:ssl.enable=false --o:ssl.termination=true";
+      };
+      extraOptions = [ "--cap-add=MKNOD" ];
+    };
+  };
+
   services.nginx = {
     enable = true;
+
+    additionalModules = [ pkgs.nginxModules.moreheaders ]; # Include headers-more-nginx-module
+
     virtualHosts = let
       domain = secrets.nginx.domain;
     in {
-      "${domain}" = {
-        forceSSL = true;
-        enableACME = true;
-        serverAliases = [ domain ];
-        locations."/" = {
-          root = "/var/www";
-        };
-      };
+      # "${domain}" = {
+      #   forceSSL = true;
+      #   enableACME = true;
+      #   serverAliases = [ domain ];
+      #   locations."/" = {
+      #     root = "/var/www";
+      #   };
+      # };
       "mail.${domain}" = {
         forceSSL = true;
         enableACME = true;
@@ -73,6 +99,44 @@
       ${config.services.nextcloud.hostName} = {
         forceSSL = true;
         enableACME = true;
+        # locations = {
+        #   "/".proxyWebsockets = true;
+        # };
+      };
+      "code.${secrets.nginx.domain}" = {
+        forceSSL = true;
+        enableACME = true;
+        locations = let
+          collaboraURL = "http://localhost:9980";
+          collaboraProxy = {
+            proxyPass = collaboraURL;
+            extraConfig = ''
+              proxy_set_header Host $host;
+              more_set_headers "X-Frame-Options: ALLOWALL";
+            '';
+          };
+          collaboraSocket = {
+            proxyPass = collaboraURL;
+            extraConfig = ''
+              proxy_set_header Upgrade $http_upgrade;
+              proxy_set_header Connection "Upgrade";
+              proxy_set_header Host $host;
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              proxy_set_header X-Forwarded-Proto $scheme;
+              proxy_http_version 1.1;
+              proxy_read_timeout 36000s;
+              more_set_headers "X-Frame-Options: ALLOWALL"; # Note: The Admin Console websocket does not use X-Frame-Options
+            '';
+          };
+        in {
+          "^~ /browser" = collaboraProxy; # static files
+          "^~ /hosting/discovery" = collaboraProxy; # WOPI discovery URL
+          "^~ /hosting/capabilities" = collaboraProxy; # Capabilities
+          "~ ^/cool/(.*)/ws$" = collaboraSocket; # main websocket
+          "~ ^/(c|l)ool" = collaboraProxy; # download, presentation and image upload
+          "^~ /cool/adminws" = collaboraSocket; # Admin Console websocket
+        };
       };
     };
   };
@@ -93,26 +157,41 @@
       adminpassFile = config.age.secrets.nextcloud-admin-pass.path;
       dbtype = "pgsql";
     };
-    autoUpdateApps.enable = true;
-    extraApps = {
-      inherit (config.services.nextcloud.package.packages.apps) contacts calendar tasks;
-    };
-    extraAppsEnable = true;
+    appstoreEnable = true;
+    # autoUpdateApps.enable = true;
+    # extraApps = {
+    #   inherit (config.services.nextcloud.package.packages.apps) contacts calendar tasks polls twofactor_webauthn deck mail;
+    #   richdocuments = pkgs.fetchNextcloudApp {
+    #     # sha256 and url from https://github.com/helsinki-systems/nc4nix/blob/main/28.json
+    #     sha256 = "1d2pc1d871dwrqcif8qp5ixrvjjbcpy0b6p1a9pkh8hj616zhjc6"; # used nix repl with builtins.fetchTarball
+    #     url = "https://github.com/nextcloud-releases/richdocuments/releases/download/v8.3.1/richdocuments-v8.3.1.tar.gz";
+    #     license = "agpl3";
+    #   };
+    #   # richdocumentscode = pkgs.fetchNextcloudApp {
+    #   #   sha256 = "z+MKslAyWo/DWw5h4XpxgTuvgsUE+UQ652DPIoJgEyo="; # had to use lib.fakeSha256 to get correct hash
+    #   #   url = "https://github.com/CollaboraOnline/richdocumentscode/releases/download/23.5.705/richdocumentscode.tar.gz";
+    #   #   # must use license names from https://github.com/NixOS/nixpkgs/blob/master/lib/licenses.nix
+    #   #   license = "asl20";
+    #   # };
+    # };
+    # extraAppsEnable = true;
     configureRedis = true;
     extraOptions = {
       mail_smtpmode = "sendmail";
       mail_sendmailmode = "pipe";
-      overwriteprotocol = "https";
+      # overwriteprotocol = "https";
       default_phone_region = "GB";
+      # allow_local_remote_servers = true;
+      # trusted_domains = [ config.virtualisation.oci-containers.containers.collabora.environment.server_name ];
     };
     maxUploadSize = "16G";
     https = true;
-    phpOptions = {
-      "opcache.jit" = "tracing";
-      "opcache.jit_buffer_size" = "100M";
-      # recommended by nextcloud admin overview
-      "opcache.interned_strings_buffer" = "16";
-    };
+    # phpOptions = {
+    #   "opcache.jit" = "tracing";
+    #   "opcache.jit_buffer_size" = "100M";
+    #   # recommended by nextcloud admin overview
+    #   "opcache.interned_strings_buffer" = "16";
+    # };
 
   };
 
