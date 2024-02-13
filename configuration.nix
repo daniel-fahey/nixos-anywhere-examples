@@ -219,7 +219,7 @@ in
     # };
     # extraAppsEnable = true;
     configureRedis = true;
-    extraOptions = {
+    settings = {
       mail_smtpmode = "sendmail";
       mail_sendmailmode = "pipe";
       # overwriteprotocol = "https";
