@@ -41,6 +41,8 @@ in
   nix.nixPath = [ "nixpkgs=${pkgs.path}" ]; # for `nix-shell -p ...`
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.trusted-substituters = [ "https://cache.nixos.org/" "https://ai.cachix.org" ];
+  nix.settings.trusted-users = [ "root" "daniel" ];
 
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
