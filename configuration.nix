@@ -48,8 +48,14 @@ in
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.efi.efiSysMountPoint = "/efi";
 
-  services.openssh.enable = true;
-  services.openssh.settings.X11Forwarding = true;
+  services.openssh = {
+    enable = true;
+    settings = {
+      PermitRootLogin = "no";
+      PasswordAuthentication = false;
+      X11Forwarding = true;
+    };
+  };
 
   environment.variables.EDITOR = "vim";
 
