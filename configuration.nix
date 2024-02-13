@@ -30,6 +30,13 @@ in
     ./disk-config.nix
   ];
 
+  users.users.daniel = {
+    isNormalUser = true;
+    extraGroups = [ 
+      "wheel" # Enable ‘sudo’ for the user.
+    ];
+  };
+
   # This line will populate NIX_PATH
   nix.nixPath = [ "nixpkgs=${pkgs.path}" ]; # for `nix-shell -p ...`
 
