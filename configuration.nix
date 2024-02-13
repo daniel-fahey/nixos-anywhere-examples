@@ -314,7 +314,7 @@ in
   zramSwap = {
     enable = true;
     swapDevices = 1;  # One zram device
-    memoryPercent = 50;  # Use up to 50% of total RAM
+    memoryPercent = 95;  # Use up to 95% of total RAM
     algorithm = "zstd";  # Use Zstandard compression
     priority = 10;  # Higher priority than disk-based swap
     # Optional: memoryMax, writebackDevice
